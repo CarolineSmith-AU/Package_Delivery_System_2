@@ -1,3 +1,7 @@
+/*
+ * This class contains the components of an address. 
+ */
+
 #include <stdlib.h>
 #include <iostream>
 #include <string>
@@ -12,6 +16,7 @@ private:
 	string state;
 
 public:
+	//constructor
 	Address(int houseNumIn, string streetNameIn, string zipCodeIn, string cityIn, string stateIn) {
 		houseNum = houseNumIn;
 		streetName = streetNameIn;
@@ -20,7 +25,9 @@ public:
 		state = stateIn;
 	}
 
-	/**************Class Methods**************/
+	/*
+	 * Takes components of an Address and concatenates them into one string.
+	 */
 	string toString() {
 		return to_string(this->houseNum) + " " + this->streetName + " " + this->city + ", " + this->state + " " + this->zipCode;
 	}

@@ -1,3 +1,7 @@
+/*
+ * This represents the website user interface that a person tracking or intercepting mail would interact with.
+ */
+
 /* Standard C++ includes */
 #include <stdlib.h>
 #include <iostream>
@@ -30,6 +34,9 @@ int main(void) {
 	return 0;
 }
 
+/*
+ * Decides what action should be taken based on user input.
+ */
 void executeAction() {
 	cout << "Available actions:\n"
 		<< "\t(1) Track a package\n\t(2) Redirect a package\n\t(3) Hold a package" << endl;
@@ -68,6 +75,10 @@ void executeAction() {
 	return executeAction();
 }
 
+/*
+ * Displays the statuses of a parcel to the UI.
+ * @param - tracking number
+ */
 void displayStatuses(string trackingNum) {
 	DB_Calls *db = new DB_Calls();
 	vector<Triplet> statuses = db->getStatuses(trackingNum);
@@ -78,17 +89,28 @@ void displayStatuses(string trackingNum) {
 	}
 }
 
+/*
+ * Calls the method that handles package redirection in "DB_Calls.h" and displays a success message to user.
+ * @param - address ID and tracking number
+ */
 void redirectPackage(int addrID, string trackingNum) {
 	db->redirectPackage(addrID, trackingNum);
 	cout << "Your package has been redirected to " << db->getAddress(addrID)->toString() << endl;
 }
 
+/*
+ * Calls the method that handles holding a package in "DB_Calls.h" and displays a success message to user.
+ * @param - tracking number
+ */
 void holdPackage(string trackingNum) {
 	db->holdPackage(trackingNum);
 	cout << "Your package intercept request is being processed." << endl;
 }
 
-/* Methods for displaying prompts and handling user input */
+/*
+ * Displays the initial action prompt to the user.
+ * return - the integer relating to the chosen action.
+ */
 int displayInitPrompt() {
 	cout << "Please enter 1, 2 or 3 to complete an action: ";
 
@@ -104,6 +126,10 @@ int displayInitPrompt() {
 	return action;
 }
 
+/*
+ * Displays prompt asking for a tracking number.
+ * return - returns the tracking number entered by the user.
+ */
 string displayTrackNumPrompt() {
 	cout << "Enter your 12-digit tracking number: ";
 	
@@ -125,6 +151,10 @@ string displayTrackNumPrompt() {
 	}
 }
 
+/*
+ * Displays the prompt asking for an address and checks to see if the address is in the DB.
+ * return - returns ID of address if found, and displays and error message and asks for another address if not found.
+ */
 int displayAddressPrompt() {
 	string street;
 	string city;
