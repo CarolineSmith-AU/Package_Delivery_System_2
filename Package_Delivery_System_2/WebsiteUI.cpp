@@ -27,6 +27,7 @@ void displayStatuses(string trackingNum);
 void redirectPackage(int addrID, string trackingNum);
 void holdPackage(string trackingNum);
 void trimWhiteSpace(string& stringToTrim);
+string statusToString(int statusInt);
 
 int main(void) {
 	cout << "***Welcome to our Package Delivery System Simulation!***" << endl;
@@ -83,10 +84,52 @@ void displayStatuses(string trackingNum) {
 	DB_Calls *db = new DB_Calls();
 	vector<Triplet> statuses = db->getStatuses(trackingNum);
 	cout << "Statuses for #" << trackingNum << ":" << endl;
-	cout << "DATE & TIME\t\t\tSTATUSES\t\t\tLOCATION" << endl;
+	cout << "DATE & TIME\t\t\t\tSTATUSES\t\t\t\t\t\tLOCATION" << endl;
 	for (int i = 0; i < statuses.size(); i++) {
-		cout << statuses[i].dateTime << "\t\t\t" << statuses[i].status << "\t\t\t" << statuses[i].addr->toString() << endl;
+		cout << statuses[i].dateTime << "\t\t\t" << statusToString(statuses[i].status) << "\t\t\t" << statuses[i].addr->toString() << endl;
 	}
+}
+
+string statusToString(int statusInt) {
+	string statusString;
+	switch (statusInt) {
+	case 0: 
+		statusString = "Your package has been received at the post office.";
+		break;
+
+	case 1:
+		statusString = "Your package is departing the post office.";
+		break;
+
+	case 2:
+		statusString = "Your package has been received at the processing plant";
+		break;
+
+	case 3:
+		statusString = "Your package is departing the processing plant";
+		break;
+
+	case 4:
+		statusString = "Your package is out for delivery";
+		break;
+
+	case 5:
+		statusString = "Your package has been delivered.";
+		break;
+
+	case 6: 
+		statusString = "Your package is being held for pickup at a post office.";
+		break;
+
+	case 7:
+		statusString = "Your package has been redirected to a new destination.";
+		break;
+
+	default:
+		statusString = "This status is not recognized.";
+		break;
+	}
+	return statusString;
 }
 
 /*
