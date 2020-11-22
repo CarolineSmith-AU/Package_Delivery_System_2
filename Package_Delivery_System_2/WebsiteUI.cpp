@@ -5,11 +5,11 @@
 /* Standard C++ includes */
 #include <stdlib.h>
 #include <iostream>
-#include "DB_Calls.h"
+#include "WebsiteBoundary.h"
 
 using namespace std;
 
-DB_Calls* db = new DB_Calls();
+WebsiteBoundary* db = new WebsiteBoundary();
 
 /* Constant Variables */
 const int TRACK_PACKAGE = 1; 
@@ -81,8 +81,8 @@ void executeAction() {
  * @param - tracking number
  */
 void displayStatuses(string trackingNum) {
-	DB_Calls *db = new DB_Calls();
-	vector<Triplet> statuses = db->getStatuses(trackingNum);
+	WebsiteBoundary *db = new WebsiteBoundary();
+	vector<Status> statuses = db->getStatuses(trackingNum);
 	cout << "Statuses for #" << trackingNum << ":" << endl;
 	cout << "DATE & TIME\t\t\t\tSTATUSES\t\t\t\t\t\tLOCATION" << endl;
 	for (int i = 0; i < statuses.size(); i++) {
@@ -133,7 +133,7 @@ string statusToString(int statusInt) {
 }
 
 /*
- * Calls the method that handles package redirection in "DB_Calls.h" and displays a success message to user.
+ * Calls the method that handles package redirection in "WebsiteBoundary.h" and displays a success message to user.
  * @param - address ID and tracking number
  */
 void redirectPackage(int addrID, string trackingNum) {
@@ -142,7 +142,7 @@ void redirectPackage(int addrID, string trackingNum) {
 }
 
 /*
- * Calls the method that handles holding a package in "DB_Calls.h" and displays a success message to user.
+ * Calls the method that handles holding a package in "WebsiteBoundary.h" and displays a success message to user.
  * @param - tracking number
  */
 void holdPackage(string trackingNum) {
@@ -183,7 +183,7 @@ string displayTrackNumPrompt() {
 		cout << "The tracking number you entered is not 12-digits." << endl;
 		return displayTrackNumPrompt();
 	}
-	DB_Calls* db = new DB_Calls();
+	WebsiteBoundary* db = new WebsiteBoundary();
 	if (db->checkTrackNumExists(trackNum) >= 0) {
 		return trackNum;
 	}
@@ -228,7 +228,7 @@ int displayAddressPrompt() {
 
 	Address *addr = new Address(stoi(houseNum), streetName, zipCode, city, state);
 
-	DB_Calls* db = new DB_Calls();
+	WebsiteBoundary* db = new WebsiteBoundary();
 	int addrID = db->checkAddressExists(addr);
 	if (addrID >= 0) {
 		return addrID;

@@ -18,12 +18,21 @@
     <ClCompile Include="WebsiteUI.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+    <ClCompile Include="Package.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DB_Calls.h">
+    <ClInclude Include="WebsiteBoundary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Parcel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Package.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

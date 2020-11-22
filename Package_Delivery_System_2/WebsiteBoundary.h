@@ -23,14 +23,13 @@
 using namespace std;
 
 /* Structs */
-struct Triplet {
+struct Status {
     int status;
     Address* addr;
     string dateTime;
 };
 
-/* Constructor */
-class DB_Calls {
+class WebsiteBoundary {
 private:
     sql::Driver* driver;
     sql::Connection* con;
@@ -39,7 +38,8 @@ private:
 
 public:
 
-    DB_Calls() {}   
+    /* Constructor */
+    WebsiteBoundary() { }   
 
     /*
      * Checks if a tracking number exists in the DB.
@@ -178,9 +178,9 @@ public:
      * @param - tracking number
      * return - returns a vector of Triplet structs, containing the date and time stamp, the status and the location.
      */
-    vector<Triplet> getStatuses(string trackingNum) {
-        vector<Triplet> statuses;
-        Triplet trip;
+    vector<Status> getStatuses(string trackingNum) {
+        vector<Status> statuses;
+        Status trip;
         string query = "SELECT * FROM STATUSES WHERE TRACKING_NUM = \"" + trackingNum + "\"" + " ORDER BY TIME_STAMP DESC";
         getQuery(query);
         sql::ResultSet* tempRes;

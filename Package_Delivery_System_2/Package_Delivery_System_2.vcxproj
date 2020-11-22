@@ -156,11 +156,14 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Package.cpp" />
     <ClCompile Include="WebsiteUI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
-    <ClInclude Include="DB_Calls.h" />
+    <ClInclude Include="Package.h" />
+    <ClInclude Include="Parcel.h" />
+    <ClInclude Include="WebsiteBoundary.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
