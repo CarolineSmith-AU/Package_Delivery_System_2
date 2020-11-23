@@ -161,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Address.h" />
+    <ClInclude Include="DB_Connection_Handler.h" />
     <ClInclude Include="Package.h" />
     <ClInclude Include="Parcel.h" />
     <ClInclude Include="WebsiteBoundary.h" />

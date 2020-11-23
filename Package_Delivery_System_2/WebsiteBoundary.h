@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include "Address.h"
+#include "DB_Connection_Handler.h"
 
 /*
   Include directly the different
@@ -31,10 +32,8 @@ struct Status {
 
 class WebsiteBoundary {
 private:
-    sql::Driver* driver;
-    sql::Connection* con;
-    sql::Statement* stmt;
-    sql::ResultSet* res;
+    /*Database connection handler*/
+    DB_Conn_Handler *handler = new DB_Conn_Handler("package_delivery_sys");
 
 public:
 
@@ -48,8 +47,9 @@ public:
      */
     int checkTrackNumExists(string trackingNum) {
         string query = "SELECT * FROM parcels WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        getQuery(query);
-        if (res->next()) {
+        handler->getQuery(query);
+      
+        if (handler->getRes()->next()) {
             return 1;
         }
         else {
@@ -65,10 +65,10 @@ public:
     int checkAddressExists(Address *addr) {
         string query = "SELECT * FROM addresses WHERE HOUSE_NUM = " + to_string(addr->getHouseNum()) + " AND STREET_NAME = \"" + addr->getStreetName() + "\"" + " AND ZIP_CODE = \"" + addr->getZipCode() + "\"" + " AND CITY = \"" + addr->getCity() + "\"" + " AND STATE = \"" + addr->getState() + "\"";
 
-        getQuery(query);
+        handler->getQuery(query);
 
-        if (res->next()) {
-            int addrID = res->getInt("ID");
+        if (handler->getRes()->next()) {
+            int addrID = handler->getRes()->getInt("ID");
             return addrID;
         }
         else {
@@ -83,9 +83,9 @@ public:
      */
     bool hasBeenRedirected(string trackingNum) {
         string query = "SELECT * FROM parcels WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        getQuery(query);
-        res->next();
-        int flag = res->getInt("REDIRECT_FLAG");
+        handler->getQuery(query);
+        handler->getRes()->next();
+        int flag = handler->getRes()->getInt("REDIRECT_FLAG");
         if (flag == 1) {
             return true;
         }
@@ -99,11 +99,11 @@ public:
      */
     void updateParcelStatus(string trackingNum, int status, int location) {
         string nowQuery = "SELECT NOW()";
-        getQuery(nowQuery);
-        res->next();
-        string now = res->getString("NOW()");
+        handler->getQuery(nowQuery);
+        handler->getRes()->next();
+        string now = handler->getRes()->getString("NOW()");
         string insertQuery = "INSERT INTO statuses (TRACKING_NUM, TIME_STAMP, STAT, LOCATION) VALUES (\"" + trackingNum + "\", \"" + now + "\", " + to_string(status) + ", " + (location == NULL ? to_string(0) : to_string(location)) + ")";
-        postQuery(insertQuery);
+        handler->postQuery(insertQuery);
     }
 
     /*
@@ -113,8 +113,8 @@ public:
     void redirectPackage(int addrID, string trackingNum) {
         string changeAddrQuery = "UPDATE parcels SET DEST_ADDR = " + to_string(addrID) + " WHERE TRACKING_NUM = \"" + trackingNum + "\"";
         string changeRedirectFlagQuery = "UPDATE parcels SET REDIRECT_FLAG = 1 WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        postQuery(changeAddrQuery);
-        postQuery(changeRedirectFlagQuery);
+        handler->postQuery(changeAddrQuery);
+        handler->postQuery(changeRedirectFlagQuery);
         updateParcelStatus(trackingNum, 7, addrID);
     }
 
@@ -125,9 +125,9 @@ public:
      */
     bool isBeingHeld(string trackingNum) {
         string query = "SELECT * FROM parcels WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        getQuery(query);
-        res->next();
-        int flag = res->getInt("HOLD_FLAG");
+        handler->getQuery(query);
+        handler->getRes()->next();
+        int flag = handler->getRes()->getInt("HOLD_FLAG");
         if (flag == 1) {
             return true;
         }
@@ -141,9 +141,9 @@ public:
      */
     bool isEnroute(string trackingNum) {
         string query = "SELECT * FROM parcels WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        getQuery(query);
-        res->next();
-        int flag = res->getInt("CURR_STAT");
+        handler->getQuery(query);
+        handler->getRes()->next();
+        int flag = handler->getRes()->getInt("CURR_STAT");
         if (flag == 4) {
             return true;
         }
@@ -156,7 +156,7 @@ public:
      */
     void holdPackage(string trackingNum) {
         string query = "UPDATE parcels SET HOLD_FLAG = 1 WHERE TRACKING_NUM = \"" + trackingNum + "\"";
-        postQuery(query);
+        handler->postQuery(query);
         updateParcelStatus(trackingNum, 6, NULL);
     }
 
@@ -167,9 +167,9 @@ public:
      */
     Address* getAddress(int addrID) {
         string query = "SELECT * FROM addresses WHERE ID = " + to_string(addrID);
-        getQuery(query);
-        res->next();
-        Address* addr = new Address(res->getInt(2), res->getString(3), res->getString(4), res->getString(5), res->getString(6));
+        handler->getQuery(query);
+        handler->getRes()->next();
+        Address* addr = new Address(handler->getRes()->getInt(2), handler->getRes()->getString(3), handler->getRes()->getString(4), handler->getRes()->getString(5), handler->getRes()->getString(6));
         return addr;
     }
 
@@ -182,101 +182,21 @@ public:
         vector<Status> statuses;
         Status trip;
         string query = "SELECT * FROM STATUSES WHERE TRACKING_NUM = \"" + trackingNum + "\"" + " ORDER BY TIME_STAMP DESC";
-        getQuery(query);
+        handler->getQuery(query);
         sql::ResultSet* tempRes;
-        while (res->next()) {
-            int status = res->getInt("STAT");   
-            string dateTime = res->getString("TIME_STAMP");
-            tempRes = res; //save res pointer
-            Address* addr = this->getAddress(res->getInt("LOCATION"));
+        while (handler->getRes()->next()) {
+            int status = handler->getRes()->getInt("STAT");
+            string dateTime = handler->getRes()->getString("TIME_STAMP");
+            tempRes = handler->getRes(); //save res pointer
+            Address* addr = this->getAddress(handler->getRes()->getInt("LOCATION"));
             
             trip.status = status;
             trip.addr = addr;
             trip.dateTime = dateTime;
             statuses.push_back(trip);
 
-            res = tempRes; //Restore res pointer
+            handler->setRes(tempRes); //Restore res pointer
         }
         return statuses;
-    }
-
-    /*
-     * Util method for sending/posting information to the DB.
-     * @param - query to run
-     */
-    int postQuery(string query) {
-        initCon();
-        try {
-            stmt->execute(query);
-            deleteCon();
-        }
-        catch (sql::SQLException & e) {
-            cout << "# ERR: SQLException in " << __FILE__;
-            cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-            cout << "# ERR: " << e.what();
-            cout << " (MySQL error code: " << e.getErrorCode();
-            cout << ", SQLState: " << e.getSQLState() << " )" << endl;
-        }
-    }
-
-    /*
-     * Utility method for getting data from the DB.
-     * @param - query to run
-     * return - returns a pointer to a ResultSet object, which holds the data from the specified table.
-     */
-    sql::ResultSet* getQuery(string query) {
-        initCon();
-        try {
-            res = stmt->executeQuery(query);
-            deleteCon();
-            return res;
-        }
-        catch (sql::SQLException & e) {
-            cout << "# ERR: SQLException in " << __FILE__;
-            cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-            cout << "# ERR: " << e.what();
-            cout << " (MySQL error code: " << e.getErrorCode();
-            cout << ", SQLState: " << e.getSQLState() << " )" << endl;
-        }
-    }
-
-    /*
-     * Initializes a connection to the DB.
-     */
-    void initCon() {
-        try {
-            string username = "root";
-            string password = "hU8f6Dw";
-            string hostname = "tcp://127.0.0.1:3306";
-
-            /* Create a connection */
-            driver = get_driver_instance();
-            con = driver->connect("tcp://127.0.0.1:3306", username, password);
-
-            /* Connect to the MySQL test database */
-            con->setSchema("package_delivery_sys");
-            stmt = con->createStatement();
-
-        }
-        catch (sql::SQLException & e) {
-            cout << "# ERR: SQLException in " << __FILE__;
-            cout << "(" << __FUNCTION__ << ") on line " << __LINE__ << endl;
-            cout << "# ERR: " << e.what();
-            cout << " (MySQL error code: " << e.getErrorCode();
-            cout << ", SQLState: " << e.getSQLState() << " )" << endl;
-        }
-        cout << endl;
-    }
-
-    /*
-     * Deletes the connection to the DB.
-     */
-    void deleteCon() {
-        if (con != NULL) {
-            delete this->con;
-        } 
-        if (stmt != NULL) {
-            delete this->stmt;
-        } 
     }
 };
